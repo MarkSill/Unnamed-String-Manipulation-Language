@@ -2,6 +2,11 @@ body {
 	font-family: sans-serif;
 }
 
+abbr {
+	border-bottom: 1px dotted black;
+	cursor: help;
+}
+
 #run {
 	position: absolute;
 	top: 0;
@@ -19,4 +24,12 @@ body {
 	overflow-y: auto;
 	padding-left: 2px;
 	border-left: 1px solid rgba(0, 0, 0, 0.3);
+}
+
+#code-step-first, #code-step-middle, #code-step-last, #code-step-under {
+	font-family: monospace;
+}
+
+#code-step-middle {
+	background-color: rgba(255, 255, 0, 0.8);
 }

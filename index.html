@@ -2,7 +2,7 @@
 <html>
 	<head>
 		<meta charset="utf-8" />
-		<title>StringLang</title>
+		<title>USML</title>
 		<link rel="stylesheet" href="main.css" />
 	</head>
 	<body>
@@ -13,10 +13,14 @@
 			</p>
 			<textarea id="code" rows="10" cols="40"></textarea>
 			<p>
+				<span id="code-step-first"></span><span id="code-step-middle"></span><span id="code-step-last">&nbsp;</span><br />
+				<span id="code-step-under">&nbsp;</span>
+			</p>
+			<p>
 				<strong>Input</strong>
 			</p>
 			<textarea id="input" rows="10" cols="40"></textarea><br />
-			<button id="submit">Submit</button>
+			<button id="submit">Run</button> <button id="step">Step</button>
 			<p>
 				<strong>Output</strong>
 			</p>
@@ -25,7 +29,7 @@
 		<div id="reference">
 			<h1>Reference</h1>
 			<p>
-				This language is a small language intended for writing tiny programs based around string manipulation. The language is still very much in its infancy.
+				<abbr title="Unnamed String Manipulation Language">USML</abbr> (pronounced ooze-mel) is a small language intended for writing tiny programs based around string manipulation. The language is still very much in its infancy.
 			</p>
 			<h2>Commands</h2>
 			<ul>
