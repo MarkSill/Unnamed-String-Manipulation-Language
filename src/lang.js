@@ -3,6 +3,10 @@ var Lang;
 (function() {
 	"use strict";
 
+
+	let substringFirst;
+	let substringSecond;
+
 	Lang = {
 		run: (code = "", input = "", debug = undefined) => {
 			if (!code) {
@@ -14,6 +18,10 @@ var Lang;
 			let index = 1;
 			let escape = false;
 			let stack = [];
+
+			substringFirst = undefined;
+			substringSecond = undefined;
+
 			let cmd = (buffer) => {
 				stack.push({
 					cmd: Lang.commandDefault,
@@ -24,13 +32,18 @@ var Lang;
 			let oldCmd = (buffer) => {
 				let func = stack.pop();
 				buffer = func.cmd(buffer, input);
-				if (debug) {
-					debug(output + buffer, func.index - 1, func.lastIndex || func.index);
+				if (debug && func.debug !== false) {
+					debug(output, func.index - 1, func.lastIndex || func.index);
 				}
 				if (stack.length) {
 					oldCmd(buffer);
 				} else {
-					output += buffer;
+					if (buffer !== undefined) {
+						output += buffer;
+					}
+					if (func.after) {
+						func.after();
+					}
 				}
 				return output;
 			};
@@ -40,9 +53,7 @@ var Lang;
 						nStr += ch;
 					} else {
 						let n = parseInt(nStr);
-						if (debug) {
-							debug(output, index - nStr.length - 1, index);
-						}
+						oldCmd(n);
 						nStr = undefined;
 					}
 				}
@@ -59,6 +70,38 @@ var Lang;
 							cmd: Lang.commandLower,
 							index: index
 						});
+					} else if (ch === "s") {
+						stack.push({
+							cmd: Lang.commandSubstringOne,
+							index: index,
+							after: () => {
+								stack.push({
+									cmd: Lang.commandSubstringOne,
+									debug: false
+								});
+							}
+						});
+					} else if (ch === "S") {
+						stack.push({
+							cmd: Lang.commandSubstringTwo,
+							index: index,
+							after: () => {
+								stack.push({
+									cmd: Lang.commandSubstringTwo,
+									debug: false,
+									after: () => {
+										stack.push({
+											cmd: Lang.commandSubstringTwo,
+											debug: false
+										});
+									}
+								});
+							}
+						});
+					} else if (ch === "i") {
+						cmd(input);
+					} else if (ch === "q") {
+						cmd(code);
 					} else if (ch === "\"") {
 						str = "";
 					} else if (ch === "'") {
@@ -72,9 +115,6 @@ var Lang;
 					} else {
 						output = `Error: Invalid command "${ch}" at character ${index}.`;
 						break;
-					}
-					if (debug && typeof str !== "string" && !nStr) {
-						//debug(output, index - 1, index);
 					}
 				} else {
 					let c = ch;
@@ -132,6 +172,29 @@ var Lang;
 		},
 		commandLower: (buffer) => {
 			return buffer.toLowerCase();
+		},
+		commandSubstringOne: (buffer) => {
+			if (substringFirst !== undefined) {
+				let str = buffer.substring(substringFirst);
+				substringFirst = undefined;
+				return str;
+			} else {
+				substringFirst = buffer;
+			}
+		},
+		commandSubstringTwo: (buffer) => {
+			if (substringFirst !== undefined) {
+				if (substringSecond !== undefined) {
+					let str = buffer.substring(substringFirst, substringSecond);
+					substringFirst = undefined;
+					substringSecond = undefined;
+					return str;
+				} else {
+					substringSecond = buffer;
+				}
+			} else {
+				substringFirst = buffer;
+			}
 		}
 	};
 })();

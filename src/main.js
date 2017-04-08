@@ -9,7 +9,6 @@
 	const stepFirst = document.querySelector("#code-step-first");
 	const stepMiddle = document.querySelector("#code-step-middle");
 	const stepLast = document.querySelector("#code-step-last");
-	const stepUnder = document.querySelector("#code-step-under");
 
 	let steps;
 	let stepIndex;
@@ -20,7 +19,6 @@
 		stepFirst.innerText = "";
 		stepMiddle.innerText = "";
 		stepLast.innerHTML = "&nbsp;";
-		stepUnder.innerHTML = "&nbsp;";
 	});
 
 	button.addEventListener("click", () => {
@@ -41,27 +39,14 @@
 		}
 		let s = steps[stepIndex++];
 		if (s) {
-			stepFirst.innerText = code.value.substring(0, s.index);
-			stepMiddle.innerText = code.value.substring(s.index, s.endIndex);
-			stepLast.innerText = code.value.substring(s.endIndex);
-			let str = "";
-			for (let i = 0; i < s.index; i++) {
-				str += "&nbsp;";
-			}
-			let size = s.endIndex - s.index - 1;
-			if (size === 0) {
-				size = 1;
-			}
-			for (let i = 0; i < size; i++) {
-				str += "^";
-			}
-			stepUnder.innerHTML = str;
+			stepFirst.innerText = code.value.substring(0, s.index).replace(/\n/g, "");
+			stepMiddle.innerText = code.value.substring(s.index, s.endIndex).replace(/\n/g, "");
+			stepLast.innerText = code.value.substring(s.endIndex).replace(/\n/g, "");
 			output.innerText = s.output;
 		} else {
-			stepFirst.innerText = code.value;
+			stepFirst.innerText = code.value.replace(/\n/g, "");
 			stepMiddle.innerText = "";
 			stepLast.innerHTML = "&nbsp;";
-			stepUnder.innerHTML = "&nbsp;";
 			steps = undefined;
 			output.innerText = stepResult;
 		}
