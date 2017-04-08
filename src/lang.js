@@ -4,8 +4,8 @@ var Lang;
 	"use strict";
 
 
-	let substringFirst;
-	let substringSecond;
+	let first;
+	let second;
 
 	Lang = {
 		run: (code = "", input = "", debug = undefined) => {
@@ -20,33 +20,40 @@ var Lang;
 			let stack = [];
 			let comment = false;
 
-			substringFirst = undefined;
-			substringSecond = undefined;
+			first = undefined;
+			second = undefined;
 
 			let cmd = (buffer) => {
-				stack.push({
-					cmd: Lang.commandDefault,
-					index: index
-				});
+				if (stack.length === 0) {
+					stack.push({
+						cmd: Lang.commandDefault,
+						index: index,
+						needs: [""]
+					});
+				}
 				oldCmd(buffer);
 			};
 			let oldCmd = (buffer) => {
-				let func = stack.pop();
-				buffer = func.cmd(buffer, input);
-				if (debug && func.debug !== false) {
-					debug(output, func.index - 1, func.lastIndex || func.index);
+				let func = stack[stack.length - 1];
+				//TODO: Arg type checking.
+				if (!func.args) {
+					func.args = [];
 				}
-				if (stack.length) {
-					oldCmd(buffer);
-				} else {
-					if (buffer !== undefined) {
-						output += buffer;
+				func.args.push(buffer);
+				if (func.args.length === func.needs.length) {
+					stack.pop();
+					buffer = func.cmd(func.args, input);
+					if (debug && func.debug !== false) {
+						debug(output, func.index - 1, func.lastIndex || func.index);
 					}
-					if (func.after) {
-						func.after();
+					if (stack.length) {
+						oldCmd(buffer);
+					} else {
+						if (buffer !== undefined) {
+							output += buffer;
+						}
 					}
 				}
-				return output;
 			};
 			for (let index = 0; index < code.length; index++) {
 				let ch = code[index];
@@ -61,7 +68,7 @@ var Lang;
 						nStr += ch;
 					} else {
 						let n = parseInt(nStr);
-						oldCmd(n);
+						cmd(n);
 						nStr = undefined;
 					}
 				}
@@ -71,40 +78,26 @@ var Lang;
 					} else if (ch === "u") {
 						stack.push({
 							cmd: Lang.commandUpper,
-							index: index
+							index: index,
+							needs: [""]
 						});
 					} else if (ch === "l") {
 						stack.push({
 							cmd: Lang.commandLower,
-							index: index
+							index: index,
+							needs: [""]
 						});
 					} else if (ch === "s") {
 						stack.push({
 							cmd: Lang.commandSubstringOne,
 							index: index,
-							after: () => {
-								stack.push({
-									cmd: Lang.commandSubstringOne,
-									debug: false
-								});
-							}
+							needs: [0, ""]
 						});
 					} else if (ch === "S") {
 						stack.push({
 							cmd: Lang.commandSubstringTwo,
 							index: index,
-							after: () => {
-								stack.push({
-									cmd: Lang.commandSubstringTwo,
-									debug: false,
-									after: () => {
-										stack.push({
-											cmd: Lang.commandSubstringTwo,
-											debug: false
-										});
-									}
-								});
-							}
+							needs: [0, "", 0]
 						});
 					} else if (ch === "i") {
 						cmd(input);
@@ -114,6 +107,18 @@ var Lang;
 						break;
 					} else if (ch === "c") {
 						cmd(code[++index]);
+					} else if (ch === "f") {
+						stack.push({
+							cmd: Lang.commandFindOne,
+							index: index,
+							needs: ["", ""]
+						});
+					} else if (ch === "F") {
+						stack.push({
+							cmd: Lang.commandFindTwo,
+							index: index,
+							needs: ["", ""]
+						});
 					} else if (ch === "\"") {
 						str = "";
 					} else if (ch === "'") {
@@ -143,20 +148,10 @@ var Lang;
 						if (c === "\\") {
 							escape = true;
 						} else if (c === "\"" || c === "\n") {
-							stack.push({
-								cmd: Lang.commandDefault,
-								index: index - str.length - 1,
-								lastIndex: index
-							});
-							oldCmd(str);
+							cmd(str);
 							str = undefined;
 						} else if (c === "'") {
-							stack.push({
-								cmd: Lang.commandDefault,
-								index: index - str.length - 1,
-								lastIndex: index
-							});
-							oldCmd(`${str} `);
+							cmd(str + " ");
 							str = undefined;
 						} else {
 							str += c;
@@ -165,48 +160,32 @@ var Lang;
 				}
 			}
 			if (str) {
-				stack.push({
-					cmd: Lang.commandDefault,
-					index: index - str.length - 1,
-					lastIndex: index
-				});
-				oldCmd(str);
+				cmd(str);
 			} else if (nStr) {
 				cmd(parseInt(nStr));
 			}
 			return output;
 		},
-		commandDefault: (buffer) => {
-			return buffer;
+		commandDefault: (args) => {
+			return args[0];
 		},
-		commandUpper: (buffer) => {
-			return buffer.toUpperCase();
+		commandUpper: (args) => {
+			return args[0].toUpperCase();
 		},
-		commandLower: (buffer) => {
-			return buffer.toLowerCase();
+		commandLower: (args) => {
+			return args[0].toLowerCase();
 		},
-		commandSubstringOne: (buffer) => {
-			if (substringFirst !== undefined) {
-				let str = buffer.substring(substringFirst);
-				substringFirst = undefined;
-				return str;
-			} else {
-				substringFirst = buffer;
-			}
+		commandSubstringOne: (args) => {
+			return args[1].substring(args[0]);
 		},
-		commandSubstringTwo: (buffer) => {
-			if (substringFirst !== undefined) {
-				if (substringSecond !== undefined) {
-					let str = substringSecond.substring(substringFirst, buffer);
-					substringFirst = undefined;
-					substringSecond = undefined;
-					return str;
-				} else {
-					substringSecond = buffer;
-				}
-			} else {
-				substringFirst = buffer;
-			}
+		commandSubstringTwo: (args) => {
+			return args[1].substring(args[0], args[2]);
+		},
+		commandFindOne: (args) => {
+			return args[0].indexOf(args[1]);
+		},
+		commandFindTwo: (args) => {
+			return args[0].indexOf(args[1]) + args[1].length;
 		}
 	};
 })();
