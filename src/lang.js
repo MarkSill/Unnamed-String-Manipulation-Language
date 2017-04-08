@@ -23,7 +23,7 @@ var Lang;
 			first = undefined;
 			second = undefined;
 
-			let cmd = (buffer) => {
+			let cmd = (buffer, size) => {
 				if (stack.length === 0) {
 					stack.push({
 						cmd: Lang.commandDefault,
@@ -31,9 +31,9 @@ var Lang;
 						needs: [""]
 					});
 				}
-				oldCmd(buffer);
+				oldCmd(buffer, size);
 			};
-			let oldCmd = (buffer) => {
+			let oldCmd = (buffer, size) => {
 				let func = stack[stack.length - 1];
 				//TODO: Arg type checking.
 				if (!func.args) {
@@ -43,8 +43,16 @@ var Lang;
 				if (func.args.length === func.needs.length) {
 					stack.pop();
 					buffer = func.cmd(func.args, input);
-					if (debug && func.debug !== false) {
-						debug(output, func.index - 1, func.lastIndex || func.index);
+					if (debug) {
+						let i = index;
+						if (i === code.length - 1) {
+							i++;
+						}
+						if (size) {
+							i += size;
+							console.log(size);
+						}
+						debug(output, func.index, i);
 					}
 					if (stack.length) {
 						oldCmd(buffer);
@@ -55,7 +63,7 @@ var Lang;
 					}
 				}
 			};
-			for (let index = 0; index < code.length; index++) {
+			for (index = 0; index < code.length; index++) {
 				let ch = code[index];
 				if (comment) {
 					if (ch === "\n") {
@@ -106,7 +114,8 @@ var Lang;
 					} else if (ch === "E") {
 						break;
 					} else if (ch === "c") {
-						cmd(code[++index]);
+						cmd(code[index + 1], 2);
+						index++;
 					} else if (ch === "f") {
 						stack.push({
 							cmd: Lang.commandFindOne,
