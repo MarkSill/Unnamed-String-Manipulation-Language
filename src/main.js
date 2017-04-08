@@ -51,4 +51,13 @@
 			output.innerText = stepResult;
 		}
 	});
+
+	let url = new URL(location.href);
+	let params = new URLSearchParams(url.search);
+	if (params.get("code")) {
+		code.value = params.get("code");
+	}
+	if (params.get("input")) {
+		input.value = params.get("input");
+	}
 })();
