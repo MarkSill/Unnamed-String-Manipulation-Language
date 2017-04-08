@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<meta charset="utf-8" />
+		<title>StringLang</title>
+		<link rel="stylesheet" href="main.css" />
+	</head>
+	<body>
+		<div id="run">
+			<h1>Live Interpreter</h1>
+			<p>
+				<strong>Code</strong>
+			</p>
+			<textarea id="code" rows="10" cols="40"></textarea>
+			<p>
+				<strong>Input</strong>
+			</p>
+			<textarea id="input" rows="10" cols="40"></textarea><br />
+			<button id="submit">Submit</button>
+			<p>
+				<strong>Output</strong>
+			</p>
+			<p id="output"></p>
+		</div>
+		<div id="reference">
+			<h1>Reference</h1>
+			<p>
+				This language is a small language intended for writing tiny programs based around string manipulation. The language is still very much in its infancy.
+			</p>
+			<h2>Commands</h2>
+			<ul>
+				<li>
+					<h3><code>h</code> (Hello, world!)</h3>
+					<p>
+						The <code>h</code> command adds the string <code>"Hello, world!"</code> to the output. That's it.
+					</p>
+				</li>
+				<li>
+					<h3><code>"</code> (Begin/End String)</h3>
+					<p>
+						The <code>"</code> command begins a string. If the interpreter reaches the end of the program before the string is ended, the ending is not required.
+					</p>
+					<h4>Escape Codes</h4>
+					<ul>
+						<li>
+							<code>\n</code>: newline
+						</li>
+						<li>
+							<code>\t</code>: tab
+						</li>
+					</ul>
+					<p>
+						You can also put a backslash before any character not listed above and it will be interpreted as that character.
+					</p>
+					<h4>Examples</h4>
+					<p>
+						A program whose output is identical to the <code>h</code> command:
+					</p>
+					<code>"Hello, world!</code>
+				</li>
+				<li>
+					<h3><code>'</code> (Begin/End String with Space)</h3>
+					<p>
+						If used to begin a string, this command creates a string with a space. If used to end a string, it inserts a space before ending the string.
+					</p>
+				</li>
+				<li>
+					<h3><code>u</code> (Uppercase)</h3>
+					<p>
+						Converts the next string to uppercase.
+					</p>
+				</li>
+				<li>
+					<h3><code>l</code> (Lowercase)</h3>
+					<p>
+						Converts the next string to lowercase.
+					</p>
+				</li>
+			</ul>
+		</div>
+		<script src="src/lang.js"></script>
+		<script src="src/main.js"></script>
+	</body>
+</html>

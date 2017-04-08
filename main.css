@@ -1,0 +1,22 @@
+body {
+	font-family: sans-serif;
+}
+
+#run {
+	position: absolute;
+	top: 0;
+	left: 4px;
+	max-width: 50%;
+	overflow: hidden;
+}
+
+#reference {
+	position: absolute;
+	top: 0;
+	right: 4px;
+	max-width: calc(50% - 10px);
+	height: 100%;
+	overflow-y: auto;
+	padding-left: 2px;
+	border-left: 1px solid black;
+}
