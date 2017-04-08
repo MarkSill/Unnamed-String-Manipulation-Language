@@ -6,6 +6,8 @@
 	const output = document.querySelector("#output");
 	const button = document.querySelector("#submit");
 	const step = document.querySelector("#step");
+	const getLink = document.querySelector("#get-link");
+	const getLinkResult = document.querySelector("#get-link-result");
 	const stepFirst = document.querySelector("#code-step-first");
 	const stepMiddle = document.querySelector("#code-step-middle");
 	const stepLast = document.querySelector("#code-step-last");
@@ -50,6 +52,14 @@
 			steps = undefined;
 			output.innerText = stepResult;
 		}
+	});
+
+	getLink.addEventListener("click", () => {
+		let url = `https://marksill.github.io/Unnamed-String-Manipulation-Language/?code=${encodeURIComponent(code.value)}`;
+		if (input.value) {
+			url += `&input=${encodeURIComponent(input.value)}`;
+		}
+		getLinkResult.innerHTML = `<a href="${url}" target="_blank">${url}</a>`;
 	});
 
 	let url = new URL(location.href);
