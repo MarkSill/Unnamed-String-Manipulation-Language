@@ -18,6 +18,7 @@ var Lang;
 			let index = 1;
 			let escape = false;
 			let stack = [];
+			let comment = false;
 
 			substringFirst = undefined;
 			substringSecond = undefined;
@@ -47,7 +48,14 @@ var Lang;
 				}
 				return output;
 			};
-			for (let ch of code) {
+			for (let index = 0; index < code.length; index++) {
+				let ch = code[index];
+				if (comment) {
+					if (ch === "\n") {
+						comment = false;
+					}
+					continue;
+				}
 				if (nStr) {
 					if (!isNaN(parseInt(ch))) {
 						nStr += ch;
@@ -57,7 +65,7 @@ var Lang;
 						nStr = undefined;
 					}
 				}
-				if (typeof str !== "string" && !nStr) {
+				if (typeof str !== "string" && !nStr && !comment) {
 					if (ch === "h") {
 						cmd("Hello, world!");
 					} else if (ch === "u") {
@@ -102,16 +110,21 @@ var Lang;
 						cmd(input);
 					} else if (ch === "q") {
 						cmd(code);
+					} else if (ch === "E") {
+						break;
+					} else if (ch === "c") {
+						cmd(code[++index]);
 					} else if (ch === "\"") {
 						str = "";
 					} else if (ch === "'") {
 						str = " ";
-					}
-					else if (!isNaN(parseInt(ch))) {
+					} else if (!isNaN(parseInt(ch))) {
 						nStr = ch;
 					}
 					else if (ch === "\n" || ch === "\t" || ch === " ") {
 						//do nothing
+					} else if (ch === "#") {
+						comment = true;
 					} else {
 						output = `Error: Invalid command "${ch}" at character ${index}.`;
 						break;
@@ -129,7 +142,7 @@ var Lang;
 					} else {
 						if (c === "\\") {
 							escape = true;
-						} else if (c === "\"") {
+						} else if (c === "\"" || c === "\n") {
 							stack.push({
 								cmd: Lang.commandDefault,
 								index: index - str.length - 1,
@@ -150,7 +163,6 @@ var Lang;
 						}
 					}
 				}
-				index++;
 			}
 			if (str) {
 				stack.push({
@@ -185,7 +197,7 @@ var Lang;
 		commandSubstringTwo: (buffer) => {
 			if (substringFirst !== undefined) {
 				if (substringSecond !== undefined) {
-					let str = buffer.substring(substringFirst, substringSecond);
+					let str = substringSecond.substring(substringFirst, buffer);
 					substringFirst = undefined;
 					substringSecond = undefined;
 					return str;
